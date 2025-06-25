@@ -5,8 +5,8 @@ from bs4 import BeautifulSoup
 from PIL import Image
 import asyncio
 from typing import List, Dict, Any
-from analysis_agent.llm_helper import create_multimodal_agent, convert_model_config_to_autogen_format
-from analysis_agent.llm_config_manager import AgentsLLMConfigManager
+from agent.llm.helper import create_multimodal_agent
+from agent.llm.config_manager import AgentsLLMConfigManager
 import logging
 logger = logging.getLogger(__name__)
 

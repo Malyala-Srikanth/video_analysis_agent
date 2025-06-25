@@ -1,7 +1,7 @@
 import traceback
 from typing import Annotated, List, Dict
-from analysis_agent.tool_registry import tool
-from analysis_agent.agent import AnalysisAgent
+from analysis_agent.agent.tools.registry import tool
+from analysis_agent.agent.core import AnalysisAgent
 
 @tool(
     agent_names=["planner_agent", "helper_agent", "analysis_agent"],

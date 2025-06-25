@@ -1,5 +1,5 @@
 [project]
-name = "analysis_agent"
+name = "video_analysis_agent"
 version = "0.1.0"
 description = "Standalone visual analysis agent for test step verification using multimodal LLMs."
 authors = [
@@ -7,12 +7,12 @@ authors = [
 ]
 readme = "README.md"
 requires-python = ">=3.8"
+dependencies = [
+    "autogen",
+    "opencv-python",
+    "pillow",
+    "beautifulsoup4"
+]
 
 [setuptools]
-packages = ["analysis_agent"]
-
-[dependencies]
-autogen = "*"
-opencv-python = "*"
-pillow = "*"
-beautifulsoup4 = "*" 
+packages = ["analysis_agent"] 

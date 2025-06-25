@@ -13,14 +13,21 @@ This folder contains a **standalone analysis agent** for visual verification of 
 ## Folder Structure
 
 ```
-analysis_agent/
-├── agent.py              # Main AnalysisAgent class
-├── tool.py               # Tool function for deviation analysis
-├── llm_helper.py         # Minimal LLM helper utilities (standalone)
-├── llm_config_manager.py # Minimal config manager (standalone, hardcoded config)
-├── tool_registry.py      # Minimal tool decorator (standalone)
-├── __init__.py           # Package marker
-└── README.md             # This file
+video_analysis_agent/
+├── agent/
+│   ├── __init__.py
+│   ├── core.py              # Main AnalysisAgent class
+│   ├── llm/
+│   │   ├── __init__.py
+│   │   ├── helper.py        # Minimal LLM helper utilities (standalone)
+│   │   └── config_manager.py# Minimal config manager (standalone, hardcoded config)
+│   └── tools/
+│       ├── __init__.py
+│       ├── analyze.py       # Tool function for deviation analysis
+│       └── registry.py      # Minimal tool decorator (standalone)
+├── __init__.py
+├── README.md
+└── main.py                  # Entry point CLI
 ```
 
 ## Usage
@@ -41,11 +48,11 @@ analysis_agent/
    ```
 2. **Configure the agent:**
 
-   - The model and API key are set in `llm_config_manager.py` (edit as needed for your environment).
+   - The model and API key are set in `agent/llm/config_manager.py` (edit as needed for your environment).
 3. **Example usage:**
 
    ```python
-   from analysis_agent.agent import AnalysisAgent
+   from analysis_agent.agent.core import AnalysisAgent
    import asyncio
 
    async def main():
@@ -57,12 +64,12 @@ analysis_agent/
    ```
 4. **As a tool:**
 
-   - The `analyze_test_deviation` function in `tool.py` can be used as a callable tool in agent frameworks.
+   - The `analyze_test_deviation` function in `agent/tools/analyze.py` can be used as a callable tool in agent frameworks.
 
 ## Notes
 
 - This package is **fully standalone** and does not depend on any code from `testzeus_hercules`.
-- To change the LLM or API settings, edit the config in `llm_config_manager.py`.
+- To change the LLM or API settings, edit the config in `agent/llm/config_manager.py`.
 - For advanced use, you may want to expand the config logic or add CLI wrappers.
 
 ---

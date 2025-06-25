@@ -1,6 +1,6 @@
 import argparse
 import asyncio
-from analysis_agent.agent import AnalysisAgent
+from agent.core import AnalysisAgent
 
 
 def main():
@@ -19,4 +19,4 @@ def main():
     asyncio.run(run())
 
 if __name__ == "__main__":
-    main() 
+    main()
