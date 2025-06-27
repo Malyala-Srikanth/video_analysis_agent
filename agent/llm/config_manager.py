@@ -17,7 +17,7 @@ class AgentsLLMConfigManager:
             cls._instance = cls()
         return cls._instance
 
-    def get_agent_config(self, agent_name: str) -> Dict[str, Any]:
+    def get_agent_config(self) -> Dict[str, Any]:
         # Hardcoded config for standalone use
         # You can edit this as needed for your environment
         return {
