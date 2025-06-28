@@ -1,6 +1,8 @@
 import argparse
 import asyncio
 from agent.core import AnalysisAgent
+import os
+import json
 
 
 def main():
@@ -15,6 +17,11 @@ def main():
         print("Deviation Report:")
         for step in report:
             print(step)
+        # Save report as JSON in the same directory as the final_output file
+        output_dir = os.path.dirname(args.final_output) if args.final_output else "."
+        output_path = os.path.join(output_dir, "deviation_report.json")
+        with open(output_path, "w", encoding="utf-8") as f:
+            json.dump(report, f, indent=2, ensure_ascii=False)
 
     asyncio.run(run())
 
