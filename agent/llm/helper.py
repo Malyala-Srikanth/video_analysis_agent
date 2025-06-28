@@ -1,13 +1,14 @@
-import copy
 import json
 import tempfile
 from typing import Any, Dict, Optional
+
 import autogen
 from autogen import ConversableAgent
-from autogen.agentchat.contrib.img_utils import gpt4v_formatter, message_formatter_pil_to_b64
+from autogen.agentchat.contrib.img_utils import message_formatter_pil_to_b64
 
 DEFAULT_LMM_SYS_MSG = "You are a helpful AI assistant."
 DEFAULT_MODEL = "gpt-4o"
+
 
 class MultimodalConversableAgent(ConversableAgent):
     DEFAULT_CONFIG = {
@@ -22,9 +23,15 @@ class MultimodalConversableAgent(ConversableAgent):
         *args: Any,
         **kwargs: Any,
     ):
-        super().__init__(name, system_message, is_termination_msg=is_termination_msg, *args, **kwargs)
+        super().__init__(
+            name, system_message, is_termination_msg=is_termination_msg, *args, **kwargs
+        )
         self.update_system_message(system_message)
-        self._is_termination_msg = is_termination_msg if is_termination_msg is not None else (lambda x: x.get("content") == "TERMINATE")
+        self._is_termination_msg = (
+            is_termination_msg
+            if is_termination_msg is not None
+            else (lambda x: x.get("content") == "TERMINATE")
+        )
         self.replace_reply_func(
             ConversableAgent.generate_oai_reply,
             MultimodalConversableAgent.generate_oai_reply,
@@ -49,9 +56,15 @@ class MultimodalConversableAgent(ConversableAgent):
             return False, None
         if messages is None:
             messages = self._oai_messages[sender]
-        messages_with_b64_img = message_formatter_pil_to_b64(self._oai_system_message + messages)
-        extracted_response = self._generate_oai_reply_from_client(llm_client=client, messages=messages_with_b64_img, cache=self.client_cache)
-        return (False, None) if extracted_response is None else (True, extracted_response)
+        messages_with_b64_img = message_formatter_pil_to_b64(
+            self._oai_system_message + messages
+        )
+        extracted_response = self._generate_oai_reply_from_client(
+            llm_client=client, messages=messages_with_b64_img, cache=self.client_cache
+        )
+        return (
+            (False, None) if extracted_response is None else (True, extracted_response)
+        )
 
     async def a_generate_oai_reply(
         self,
@@ -61,6 +74,7 @@ class MultimodalConversableAgent(ConversableAgent):
     ):
         import asyncio
         import functools
+
         return await asyncio.get_event_loop().run_in_executor(
             None,
             functools.partial(
@@ -71,6 +85,7 @@ class MultimodalConversableAgent(ConversableAgent):
             ),
         )
 
+
 def convert_model_config_to_autogen_format(model_config: dict) -> list:
     env_var = [model_config]
     with tempfile.NamedTemporaryFile(delete=False, mode="w") as temp:
@@ -78,9 +93,12 @@ def convert_model_config_to_autogen_format(model_config: dict) -> list:
         temp_file_path = temp.name
     return autogen.config_list_from_json(env_or_file=temp_file_path)
 
+
 def create_multimodal_agent(
     name: str,
     system_message: str = "You are a multimodal conversable agent.",
     llm_config: Optional[Dict[str, Any]] = None,
 ) -> MultimodalConversableAgent:
-    return MultimodalConversableAgent(name=name, system_message=system_message, llm_config=llm_config) 
+    return MultimodalConversableAgent(
+        name=name, system_message=system_message, llm_config=llm_config
+    )

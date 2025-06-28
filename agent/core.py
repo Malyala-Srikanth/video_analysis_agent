@@ -1,14 +1,18 @@
+import asyncio
 import json
+import logging
 import os
+from typing import Any, Dict, List
+
 import cv2
 from bs4 import BeautifulSoup
 from PIL import Image
-import asyncio
-from typing import List, Dict, Any
-from agent.llm.helper import create_multimodal_agent
+
 from agent.llm.config_manager import AgentsLLMConfigManager
-import logging
+from agent.llm.helper import create_multimodal_agent
+
 logger = logging.getLogger(__name__)
+
 
 class AnalysisAgent:
     def __init__(self):
@@ -23,13 +27,13 @@ class AnalysisAgent:
         )
 
     def parse_planning_log(self, path: str) -> List[str]:
-        with open(path, 'r') as f:
+        with open(path, "r") as f:
             data = json.load(f)
         steps = []
-        for entry in data.get('planner_agent', []):
-            content = entry.get('content')
-            if isinstance(content, dict) and 'plan' in content:
-                plan_lines = content['plan'].split('\n')
+        for entry in data.get("planner_agent", []):
+            content = entry.get("content")
+            if isinstance(content, dict) and "plan" in content:
+                plan_lines = content["plan"].split("\n")
                 for line in plan_lines:
                     step = line.strip()
                     if step and step[0].isdigit():
@@ -39,20 +43,24 @@ class AnalysisAgent:
         return steps
 
     def parse_final_output(self, path: str):
-        with open(path, 'r') as f:
-            soup = BeautifulSoup(f, 'html.parser')
+        with open(path, "r") as f:
+            soup = BeautifulSoup(f, "html.parser")
         outcome = None
-        outcome_tag = soup.find('td', string='Outcome:')
+        outcome_tag = soup.find("td", string="Outcome:")
         if outcome_tag:
-            outcome = outcome_tag.find_next_sibling('td').text.strip()
+            outcome = outcome_tag.find_next_sibling("td").text.strip()
         video_path = None
-        for th in soup.find_all('th'):
-            if 'Proofs Video' in th.text:
-                video_path = th.find_next_sibling('td').text.strip()
+        for th in soup.find_all("th"):
+            if "Proofs Video" in th.text:
+                video_path = th.find_next_sibling("td").text.strip()
                 break
         if not video_path:
-            logger.error(f"Could not find 'Proofs Video' in {path}. Please check the HTML structure.")
-            raise ValueError(f"Could not find 'Proofs Video' in {path}. Please check the HTML structure.")
+            logger.error(
+                f"Could not find 'Proofs Video' in {path}. Please check the HTML structure."
+            )
+            raise ValueError(
+                f"Could not find 'Proofs Video' in {path}. Please check the HTML structure."
+            )
         return outcome, video_path
 
     def extract_frames(self, video_path: str, interval_sec: int = 1):
@@ -76,12 +84,7 @@ class AnalysisAgent:
         return frames
 
     def pil_image_to_openai_image_message(self, img: Image.Image):
-        return {
-            "type": "image_url",
-            "image_url": {
-                "url": img
-            }
-        }
+        return {"type": "image_url", "image_url": {"url": img}}
 
     async def is_blank_image(self, img: Image.Image) -> bool:
         prompt = (
@@ -90,17 +93,16 @@ class AnalysisAgent:
         )
         content = [
             {"type": "text", "text": prompt},
-            self.pil_image_to_openai_image_message(img)
+            self.pil_image_to_openai_image_message(img),
         ]
         try:
             success, reply = await asyncio.to_thread(
-                self.agent.generate_oai_reply,
-                [{"role": "user", "content": content}]
+                self.agent.generate_oai_reply, [{"role": "user", "content": content}]
             )
             if not success:
                 raise RuntimeError("Failed to get a reply from the multimodal agent.")
             reply_str = str(reply).strip().lower()
-            return reply_str.startswith('yes')
+            return reply_str.startswith("yes")
         except Exception as e:
             logger.error(f"Error in is_blank_image: {e}", exc_info=True)
             return False
@@ -133,12 +135,13 @@ class AnalysisAgent:
             f"For each image, check if the step is being performed or its result is visible. "
             f"Respond with 'Observed' if you see evidence, otherwise 'Deviation'. Provide a brief note explaining your reasoning."
         )
-        images = [self.pil_image_to_openai_image_message(img) for _, img in selected_frames]
+        images = [
+            self.pil_image_to_openai_image_message(img) for _, img in selected_frames
+        ]
         content = [{"type": "text", "text": prompt}] + images
         try:
             success, reply = await asyncio.to_thread(
-                self.agent.generate_oai_reply,
-                [{"role": "user", "content": content}]
+                self.agent.generate_oai_reply, [{"role": "user", "content": content}]
             )
             if not success:
                 raise RuntimeError("Failed to get a reply from the multimodal agent.")
@@ -150,7 +153,9 @@ class AnalysisAgent:
             notes = f"Error: {e}"
         return observed, notes
 
-    async def analyze(self, planning_log: str, final_output: str) -> List[Dict[str, Any]]:
+    async def analyze(
+        self, planning_log: str, final_output: str
+    ) -> List[Dict[str, Any]]:
         try:
             steps = self.parse_planning_log(planning_log)
             outcome, video_path = self.parse_final_output(final_output)
@@ -166,9 +171,11 @@ class AnalysisAgent:
             if num_frames <= window_size or num_steps == 1:
                 # Use all frames for every step if not enough frames or only one step
                 for step in steps:
-                    observed, notes = await self.verify_step_with_llm(step, self.filtered_frames)
-                    result = '✅ Observed' if observed else '❌ Deviation'
-                    report.append({'Step': step, 'Result': result, 'Notes': notes})
+                    observed, notes = await self.verify_step_with_llm(
+                        step, self.filtered_frames
+                    )
+                    result = "✅ Observed" if observed else "❌ Deviation"
+                    report.append({"Step": step, "Result": result, "Notes": notes})
             else:
                 # Sliding window logic
                 stride = max(1, (num_frames - window_size) // max(1, num_steps - 1))
@@ -180,10 +187,12 @@ class AnalysisAgent:
                         end = num_frames
                         start = max(0, end - window_size)
                     window_frames = self.filtered_frames[start:end]
-                    observed, notes = await self.verify_step_with_llm(step, window_frames)
-                    result = '✅ Observed' if observed else '❌ Deviation'
-                    report.append({'Step': step, 'Result': result, 'Notes': notes})
+                    observed, notes = await self.verify_step_with_llm(
+                        step, window_frames
+                    )
+                    result = "✅ Observed" if observed else "❌ Deviation"
+                    report.append({"Step": step, "Result": result, "Notes": notes})
             return report
         except Exception as e:
             logger.error(f"Error in AnalysisAgent.analyze: {e}", exc_info=True)
-            return [{"error": str(e)}] 
+            return [{"error": str(e)}]

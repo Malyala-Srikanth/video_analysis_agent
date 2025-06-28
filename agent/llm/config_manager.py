@@ -1,6 +1,7 @@
 import os
 from typing import Any, Dict
 
+
 class AgentsLLMConfigManager:
     _instance = None
     _config = None
@@ -29,6 +30,6 @@ class AgentsLLMConfigManager:
             "llm_config_params": {
                 "cache_seed": 12345,
                 "temperature": 0.0,
-                "seed": 12345
-            }
-        } 
+                "seed": 12345,
+            },
+        }

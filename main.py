@@ -1,14 +1,23 @@
 import argparse
 import asyncio
-from agent.core import AnalysisAgent
-import os
 import json
+import os
+
+from agent.core import AnalysisAgent
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Run the AnalysisAgent on test execution artifacts.")
-    parser.add_argument("--planning_log", help="Path to the planning log JSON file (agent_inner_thoughts.json)")
-    parser.add_argument("--final_output", help="Path to the final output HTML file (test.feature_result.html)")
+    parser = argparse.ArgumentParser(
+        description="Run the AnalysisAgent on test execution artifacts."
+    )
+    parser.add_argument(
+        "--planning_log",
+        help="Path to the planning log JSON file (agent_inner_thoughts.json)",
+    )
+    parser.add_argument(
+        "--final_output",
+        help="Path to the final output HTML file (test.feature_result.html)",
+    )
     args = parser.parse_args()
 
     async def run():
@@ -24,6 +33,7 @@ def main():
             json.dump(report, f, indent=2, ensure_ascii=False)
 
     asyncio.run(run())
+
 
 if __name__ == "__main__":
     main()
