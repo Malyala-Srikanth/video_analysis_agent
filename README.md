@@ -60,6 +60,26 @@ pip install autogen opencv-python pillow beautifulsoup4
 
 Or use the dependencies listed in `pyproject.toml`.
 
+## Development Setup & Pre-commit Hooks
+
+To install development dependencies (including pre-commit hooks):
+
+```bash
+# With uv
+uv pip install '.[dev]'
+
+# Or with pip
+pip install '.[dev]'
+```
+
+To install and activate pre-commit hooks:
+
+```bash
+pre-commit install
+```
+
+This will automatically run code formatting and linting checks before each commit.
+
 ## Configuration
 
 The agent uses OpenAI's API for multimodal LLMs. You can configure the model and API key via environment variables or by editing `agent/llm/config_manager.py`.

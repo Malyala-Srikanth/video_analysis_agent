@@ -1,3 +1,7 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
 [project]
 name = "video_analysis_agent"
 version = "0.1.0"
@@ -14,5 +18,10 @@ dependencies = [
     "beautifulsoup4"
 ]
 
-[setuptools]
-packages = ["analysis_agent"] 
+[project.optional-dependencies]
+dev = [
+    "pre-commit"
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["agent"] 
