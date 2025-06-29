@@ -16,14 +16,20 @@ A **standalone analysis agent** for visual verification of test steps using mult
 ```
 video_analysis_agent/
 ├── agent/
-│   ├── core.py              # Main AnalysisAgent class
+│   ├── __init__.py
+│   ├── core.py              # Main AnalysisAgent class: orchestrates parsing, frame extraction, LLM verification, and report generation.
 │   ├── llm/
-│   │   ├── helper.py        # LLM helper utilities
-│   │   └── config_manager.py# Config manager (standalone)
+│   │   ├── __init__.py
+│   │   ├── helper.py        # MultimodalConversableAgent and utilities for LLM and image handling.
+│   │   └── config_manager.py# Singleton config manager; currently hardcoded config for LLM/API.
 │   └── tools/
-│       ├── analyze.py       # Deviation analysis tool
-│       └── registry.py      # Tool decorator
-├── main.py                  # CLI entry point
+│       ├── __init__.py
+│       ├── analyze.py       # Tool function: async wrapper to run deviation analysis via AnalysisAgent.
+│       └── registry.py      # Minimal decorator and registry for tool functions.
+├── __init__.py
+├── main.py                  # CLI entry point: runs AnalysisAgent on provided artifacts.
+├── README.md
+└── pyproject.toml           # Project metadata and dependencies.
 ```
 
 ## Installation
